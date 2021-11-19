@@ -1,14 +1,17 @@
 import { BrowserRouter } from 'react-router-dom';
+import AuthContext from './contexts/AuthContext';
 import ProductsContext from './contexts/ProductsContext';
 import AppRoutes from './routes';
 
 function App() {
     return (
-        <ProductsContext>
-            <BrowserRouter>
-                <AppRoutes />
-            </BrowserRouter>
-        </ProductsContext>
+        <BrowserRouter>
+            <AuthContext>
+                <ProductsContext>
+                    <AppRoutes />
+                </ProductsContext>
+            </AuthContext>
+        </BrowserRouter>
     );
 }
 

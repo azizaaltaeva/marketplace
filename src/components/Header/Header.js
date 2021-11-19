@@ -15,6 +15,13 @@ import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import MyLink from '../../shared/MyLink';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import { useProducts } from '../../contexts/ProductsContext';
+import Search from './Search';
+import { ClickAwayListener } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import { useAuth } from '../../contexts/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -78,12 +85,24 @@ const useStyles = makeStyles((theme) => ({
             display: 'none',
         },
     },
+    searchBox: {
+        position: 'absolute',
+        top: '35px',
+        zIndex: 999,
+    },
+    icon: {
+        display: 'flex',
+        alignItems: 'center'
+    }
 }));
 
 export default function Header() {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+    const [searchActive, setSearchActive] = React.useState(false);
+    const { cartData, fetchSearchProducts } = useProducts()  //get length of the cart
+    const { registerUser, user, logOut } = useAuth();  //sign in with google firebase
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -100,6 +119,10 @@ export default function Header() {
         setAnchorEl(null);
         handleMobileMenuClose();
     };
+
+    const handleSearch = (e) => {
+        fetchSearchProducts(e.target.value);
+    }
 
     const handleMobileMenuOpen = (event) => {
         setMobileMoreAnchorEl(event.currentTarget);
@@ -133,6 +156,12 @@ export default function Header() {
             onClose={handleMobileMenuClose}
         >
             <MenuItem>
+                <IconButton aria-label="show cart items" color="inherit">
+                    <Badge badgeContent={1} color="secondary">
+                        <ShoppingCartIcon />
+                    </Badge>
+                </IconButton>
+
                 <IconButton aria-label="show 4 new mails" color="inherit">
                     <Badge badgeContent={4} color="secondary">
                         <MailIcon />
@@ -174,21 +203,61 @@ export default function Header() {
                             Akim Shop
                         </Typography>
                     </MyLink>
-                    <div className={classes.search}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon />
+                    <ClickAwayListener onClickAway={() => setSearchActive(false)}>
+                        <div className={classes.search}>
+                            <div className={classes.searchIcon}>
+                                <SearchIcon />
+                            </div>
+                            <InputBase
+                                onFocus={() => setSearchActive(true)}
+                                placeholder="Search…"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                onChange={handleSearch}
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
+                            {searchActive && (
+                                <div className={classes.searchBox}>
+                                    <Search />
+                                </div>
+                                )}
                         </div>
-                        <InputBase
-                            placeholder="Search…"
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            inputProps={{ 'aria-label': 'search' }}
-                        />
-                    </div>
+                    </ClickAwayListener>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
+                    {/* <MyLink to="/register"> */} 
+                        {
+                            user ? (
+                                <>
+                                    <p>{user.email}</p>
+                                    <IconButton onClick={() => logOut()}>
+                                        <Button variant="contained">Log Out</Button>
+                                    </IconButton>
+                                </>
+                            ) : (
+                                <Button onClick={() => registerUser()} variant="contained" color="secondary">
+                                    Sign up
+                                </Button>
+                            )
+                        }
+                    {/* </MyLink> */}
+
+                    <MyLink to="/addProduct" className={classes.icon}>
+                        <IconButton aria-label="show cart items" color="inherit">
+                            <Badge color="secondary">
+                                <AddCircleIcon />
+                            </Badge>
+                        </IconButton>
+                    </MyLink>
+                    <MyLink to="/cart" className={classes.icon}>
+                        <IconButton aria-label="show cart items" color="inherit">
+                            <Badge badgeContent={cartData} color="secondary">
+                                <ShoppingCartIcon />
+                            </Badge>
+                        </IconButton>
+                    </MyLink>
                         <IconButton aria-label="show 4 new mails" color="inherit">
                             <Badge badgeContent={4} color="secondary">
                                 <MailIcon />

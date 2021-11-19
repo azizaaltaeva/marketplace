@@ -11,6 +11,9 @@ import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { Shop } from '@material-ui/icons';
 import MyLink from '../../shared/MyLink';
+import { useProducts } from '../../contexts/ProductsContext';
+import Cart from '../Cart/Cart';
+import { checkItemInCart } from '../../utils/check-item-cart';
 
 const useStyles = makeStyles({
     root: {
@@ -25,8 +28,19 @@ const useStyles = makeStyles({
     },
 });
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, cart }) => {
     const classes = useStyles();
+
+    const { addAndDeleteProductInCart } = useProducts();
+
+    const isItemInCart = () => {
+        if (cart) {
+            return checkItemInCart(cart.products, product.id);
+        } 
+        return false;
+    }
+
+    const inCart = isItemInCart();
 
     return (
         <Card className={classes.root}>
@@ -53,10 +67,10 @@ const ProductCard = ({ product }) => {
                 </CardActionArea>
             </MyLink>
             <CardActions className={classes.actions}>
-                <IconButton>
+                <IconButton onClick={() => addAndDeleteProductInCart(product)} color={inCart ? 'secondary' : 'default'} >
                     <ShoppingCartIcon />
                 </IconButton>
-                <Button color="primary" variant="contained" startIcon={<Shop />}>
+                <Button onClick={() => addAndDeleteProductInCart(product)} color="primary" variant="contained" startIcon={<Shop />}>
                     Купить
                 </Button>
             </CardActions>
